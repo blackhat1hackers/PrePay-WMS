@@ -11,6 +11,7 @@ type Cashback = {
   status: string;
   paymentMethod: string | null;
   paymentDetails: string | null;
+  screenshots: string[];
   order?: {
     orderNumber: string;
     buyer?: {

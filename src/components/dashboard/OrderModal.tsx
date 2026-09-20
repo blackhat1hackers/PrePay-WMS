@@ -16,8 +16,8 @@ type Order = {
   amount: number;
   status: string;
   buyerId: string;
-  productImage?: string;
-  productLink?: string;
+  productImage?: string | null;
+  productLink?: string | null;
   orderScreenshots: string[];
   orderSubmissionDate?: string | null;
   reviewSubmissionDate?: string | null;

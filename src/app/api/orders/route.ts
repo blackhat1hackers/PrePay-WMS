@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     }
 
     // Try including the buyer.
-    let orders = [];
+    let orders: any[] = [];
     try {
       orders = await db.order.findMany({ include: { buyer: true } });
     } catch (e) {

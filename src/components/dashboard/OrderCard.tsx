@@ -10,7 +10,11 @@ type Order = {
   amount: number;
   status: string;
   buyerId: string;
+  sellerName?: string | null;
   productImage?: string | null;
+  orderScreenshots: string[];
+  reviewScreenshots: string[];
+  refundScreenshots: string[];
   buyer?: {
     name: string;
   };

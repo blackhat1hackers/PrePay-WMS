@@ -10,7 +10,7 @@ export async function GET(request: Request) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    let cashbacks = [];
+    let cashbacks: any[] = [];
     try {
       cashbacks = await db.cashback.findMany({
         include: {
