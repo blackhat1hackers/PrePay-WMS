@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String?
+  email         String    @unique
+  passwordHash  String?
+  role          Role      @default(BUYER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  STAFF
+  BUYER
+}
+
+model Buyer {
+  id                 String    @id @default(uuid())
+  name               String
+  email              String?
+  phone              String?
+  country            String?
+  stateOrCity        String?
+  address            String?
+  accountStatus      String    @default("Active")
+  verificationStatus String    @default("Pending")
+  notes              String?
+  paypalEmail        String?
+  facebookLink       String?
+  amazonReviewLink   String?
+  imageUrl           String?
+  availableBalance   Float     @default(0.0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  orders             Order[]
+  walletLogs         WalletLog[]
+}
+
+model WalletLog {
+  id          String    @id @default(uuid())
+  buyerId     String
+  amount      Float
+  type        String
+  notes       String?
+  documentUrl String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  buyer       Buyer     @relation(fields: [buyerId], references: [id])
+}
+
+model Order {
+  id            String    @id @default(uuid())
+  orderNumber   String    @unique
+  marketplace   String    @default("Amazon")
+  sellerName    String?
+  amount        Float     @default(0.0)
+  status        String    @default("Pending")
+  orderDate     DateTime  @default(now())
+  orderSubmissionDate DateTime?
+  reviewSubmissionDate DateTime?
+  productImage  String?
+  productLink   String?
+  
+  orderScreenshots  String[] @default([])
+  reviewScreenshots String[] @default([])
+
+  buyerId       String
+  buyer         Buyer     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  
+  cashback      Cashback?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Cashback {
+  id              String    @id @default(uuid())
+  orderId         String    @unique
+  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  amount          Float     @default(0.0)
+  status          String    @default("Pending")
+  paymentMethod   String?
+  paymentDetails  String?
+  
+  screenshots     String[]  @default([])
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
