@@ -151,7 +151,10 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
           const data = await res.json();
           return data.url;
         }
-        throw new Error("Upload failed");
+        
+        // Try to get the actual error text
+        const errText = await res.text();
+        throw new Error(errText || `Upload failed with status ${res.status}`);
       });
 
       const urls = await Promise.all(uploadPromises);
@@ -164,8 +167,9 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
            [category]: [...((prev[category] as string[]) || []), ...urls] 
          }));
       }
-    } catch (err) {
-      setError("An error occurred during upload");
+    } catch (err: any) {
+      console.error("Upload Error:", err);
+      setError(err.message || "An error occurred during upload");
     } finally {
       setUploadingImage(false);
     }
