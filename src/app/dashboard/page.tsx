@@ -1,20 +1,16 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { Clock, CheckCircle2, DollarSign, Users } from "lucide-react";
+import { Clock, CheckCircle2, DollarSign, Users, Package } from "lucide-react";
 
 export default async function DashboardPage() {
-  const [totalBuyers, pendingOrdersCount, pendingCashbackAgg, totalPaidAgg, recentOrders] = await Promise.all([
+  const [totalBuyers, totalOrders, pendingOrdersCount, completedOrdersCount, recentOrders] = await Promise.all([
     db.buyer.count(),
+    db.order.count(),
     db.order.count({
       where: { status: { notIn: ['Completed', 'Cancelled'] } }
     }),
-    db.cashback.aggregate({
-      _sum: { amount: true },
-      where: { status: 'Pending' }
-    }),
-    db.cashback.aggregate({
-      _sum: { amount: true },
-      where: { status: 'Paid' }
+    db.order.count({
+      where: { status: 'Completed' }
     }),
     db.order.findMany({
       take: 5,
@@ -22,9 +18,6 @@ export default async function DashboardPage() {
       include: { buyer: true }
     })
   ]);
-
-  const pendingCashback = pendingCashbackAgg._sum.amount || 0;
-  const totalPaid = totalPaidAgg._sum.amount || 0;
 
   return (
     <div>
@@ -44,6 +37,17 @@ export default async function DashboardPage() {
         
         {/* Card 2 */}
         <div className="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-100 p-6 flex items-center">
+          <div className="p-3 rounded-full bg-indigo-50 text-indigo-600 mr-4">
+            <Package className="w-6 h-6" />
+          </div>
+          <div>
+            <dt className="text-sm font-medium text-slate-500 truncate">Total Orders</dt>
+            <dd className="mt-1 text-2xl font-semibold text-slate-900">{totalOrders}</dd>
+          </div>
+        </div>
+        
+        {/* Card 3 */}
+        <div className="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-100 p-6 flex items-center">
           <div className="p-3 rounded-full bg-amber-50 text-amber-600 mr-4">
             <Clock className="w-6 h-6" />
           </div>
@@ -53,25 +57,14 @@ export default async function DashboardPage() {
           </div>
         </div>
         
-        {/* Card 3 */}
-        <div className="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-100 p-6 flex items-center">
-          <div className="p-3 rounded-full bg-orange-50 text-orange-600 mr-4">
-            <DollarSign className="w-6 h-6" />
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-slate-500 truncate">Pending Cashback</dt>
-            <dd className="mt-1 text-2xl font-semibold text-slate-900">${pendingCashback.toFixed(2)}</dd>
-          </div>
-        </div>
-        
         {/* Card 4 */}
         <div className="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-100 p-6 flex items-center">
           <div className="p-3 rounded-full bg-green-50 text-green-600 mr-4">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <dt className="text-sm font-medium text-slate-500 truncate">Total Paid</dt>
-            <dd className="mt-1 text-2xl font-semibold text-slate-900">${totalPaid.toFixed(2)}</dd>
+            <dt className="text-sm font-medium text-slate-500 truncate">Completed Orders</dt>
+            <dd className="mt-1 text-2xl font-semibold text-slate-900">{completedOrdersCount}</dd>
           </div>
         </div>
       </div>
