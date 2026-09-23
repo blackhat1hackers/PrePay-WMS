@@ -97,9 +97,12 @@ export async function PATCH(
     });
 
     return NextResponse.json(order);
-  } catch (error) {
+  } catch (error: any) {
     console.error("[ORDER_PATCH]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    if (error.code === 'P2002') {
+      return new NextResponse("An order with this Order Number already exists.", { status: 400 });
+    }
+    return new NextResponse(error.message || "Internal Error", { status: 500 });
   }
 }
 
@@ -138,8 +141,8 @@ export async function DELETE(
     await db.order.delete({ where: { id } });
 
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("[ORDER_DELETE]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    return new NextResponse(error.message || "Internal Error", { status: 500 });
   }
 }

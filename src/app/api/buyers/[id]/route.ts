@@ -85,13 +85,13 @@ export async function DELETE(
 
     const { id } = await params;
     
-    // Check for existing wallet logs or orders for security/history preservation
-    const walletLogs = await db.walletLog.findMany({ where: { buyerId: id } });
-    const orders = await db.order.findMany({ where: { buyerId: id } });
-
-    if ((walletLogs && walletLogs.length > 0) || (orders && orders.length > 0)) {
-      return new NextResponse("Cannot delete buyer: Buyer has existing wallet logs or orders. For security and history preservation, please suspend the account instead.", { status: 400 });
-    }
+    // Delete related wallet logs first to avoid foreign key constraint errors
+    await db.walletLog.deleteMany({ where: { buyerId: id } });
+    
+    // Order and Cashback cascade on delete because of the Prisma schema, but we can explicitly delete them if preferred, 
+    // or let Prisma cascade it if the schema has onDelete: Cascade for Order.
+    // However, to be safe:
+    await db.order.deleteMany({ where: { buyerId: id } });
 
     await db.buyer.delete({ where: { id } });
 

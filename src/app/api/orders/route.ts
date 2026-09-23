@@ -41,6 +41,15 @@ export async function POST(request: Request) {
 
     const parsedAmount = parseFloat(amount) || 0;
 
+    // Check if order number already exists
+    const existingOrder = await db.order.findUnique({
+      where: { orderNumber }
+    });
+
+    if (existingOrder) {
+      return new NextResponse(`Order number ${orderNumber} already exists.`, { status: 400 });
+    }
+
     // Create the order
     const order = await db.order.create({
       data: {
@@ -88,8 +97,13 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(order);
-  } catch (error) {
+  } catch (error: any) {
     console.error("[ORDERS_POST]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    
+    if (error.code === 'P2002') {
+      return new NextResponse("An order with this Order Number already exists.", { status: 400 });
+    }
+    
+    return new NextResponse(error.message || "Internal Error", { status: 500 });
   }
 }

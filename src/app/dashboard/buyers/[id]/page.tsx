@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Edit2, Plus, Mail, Phone, MapPin, DollarSign, Loader2, Info, Wallet, History, ImageIcon, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Edit2, Plus, Mail, Phone, MapPin, DollarSign, Loader2, Info, Wallet, History, ImageIcon, Link as LinkIcon, Trash2 } from "lucide-react";
 import BuyerModal from "@/components/dashboard/BuyerModal";
 import OrderModal from "@/components/dashboard/OrderModal";
 import OrderCard from "@/components/dashboard/OrderCard";
@@ -42,6 +42,44 @@ export default function BuyerProfilePage() {
   useEffect(() => {
     fetchBuyerData();
   }, [buyerId]);
+
+  const handleDeleteBuyer = async () => {
+    if (!confirm("Are you sure you want to delete this buyer? This will also delete all their orders and wallet logs.")) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/buyers/${buyerId}`, { method: 'DELETE' });
+      if (res.ok) {
+        router.push("/dashboard/buyers");
+      } else {
+        const text = await res.text();
+        alert(text || "Failed to delete buyer");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete buyer");
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm("Are you sure you want to delete this order?")) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchBuyerData();
+      } else {
+        const text = await res.text();
+        alert(text || "Failed to delete order");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete order");
+    }
+  };
 
   if (loading) {
     return (
@@ -88,24 +126,34 @@ export default function BuyerProfilePage() {
   return (
     <div className="pb-10">
       {/* Header */}
-      <div className="flex items-center space-x-4 mb-6">
-        <button
-          onClick={() => router.push("/dashboard/buyers")}
-          className="p-2 text-slate-400 hover:text-indigo-600 bg-white border border-slate-200 rounded-xl hover:shadow-sm transition-all"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-            {buyer.name}
-            <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${
-              buyer.accountStatus === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
-              {buyer.accountStatus}
-            </span>
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">Buyer Profile Overview</p>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => router.push("/dashboard/buyers")}
+            className="p-2 text-slate-400 hover:text-indigo-600 bg-white border border-slate-200 rounded-xl hover:shadow-sm transition-all"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+              {buyer.name}
+              <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${
+                buyer.accountStatus === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
+                {buyer.accountStatus}
+              </span>
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">Buyer Profile Overview</p>
+          </div>
         </div>
+        
+        <button
+          onClick={handleDeleteBuyer}
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors shadow-sm"
+        >
+          <Trash2 className="w-4 h-4 mr-2" />
+          Delete Buyer
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -268,6 +316,7 @@ export default function BuyerProfilePage() {
                        setEditingOrder(o);
                        setIsOrderModalOpen(true);
                      }}
+                     onDelete={handleDeleteOrder}
                      showBuyer={false}
                    />
                  ))}
