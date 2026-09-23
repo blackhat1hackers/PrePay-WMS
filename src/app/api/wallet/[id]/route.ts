@@ -73,3 +73,43 @@ export async function PATCH(
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !['ADMIN', 'SUPER_ADMIN'].includes((session.user as any).role)) {
+      return new NextResponse("Unauthorized", { status: 403 });
+    }
+
+    const { id } = await params;
+
+    // Fetch existing log
+    const existingLog = await db.walletLog.findUnique({ where: { id } });
+    if (!existingLog) {
+      return new NextResponse("Wallet log not found", { status: 404 });
+    }
+
+    // Determine the signed amount to reverse
+    const isPositive = existingLog.type === "Loan" || existingLog.type === "Manual Adjustment" || existingLog.type === "Order Refund";
+    const signedAmount = isPositive ? existingLog.amount : -existingLog.amount;
+
+    // Reverse the balance on the buyer
+    const buyer = await db.buyer.findUnique({ where: { id: existingLog.buyerId } });
+    if (buyer) {
+      await db.buyer.update({
+        where: { id: buyer.id },
+        data: { availableBalance: buyer.availableBalance - signedAmount }
+      });
+    }
+
+    await db.walletLog.delete({ where: { id } });
+
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error("[WALLET_DELETE]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}

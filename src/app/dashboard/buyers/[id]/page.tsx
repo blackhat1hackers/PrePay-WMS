@@ -81,6 +81,25 @@ export default function BuyerProfilePage() {
     }
   };
 
+  const handleDeleteLog = async (logId: string) => {
+    if (!confirm("Are you sure you want to delete this transaction? This will reverse the balance adjustment.")) {
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/wallet/${logId}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchBuyerData();
+      } else {
+        const text = await res.text();
+        alert(text || "Failed to delete transaction");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete transaction");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -408,12 +427,21 @@ export default function BuyerProfilePage() {
                             )}
                           </td>
                           <td className="px-5 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <button
-                              onClick={(e) => { e.preventDefault(); setEditingLog(log); setIsAddLoanOpen(true); }}
-                              className="text-indigo-600 hover:text-indigo-900 flex items-center justify-end gap-1 ml-auto"
-                            >
-                              <Edit2 className="w-4 h-4" /> Edit
-                            </button>
+                            <div className="flex items-center justify-end gap-3">
+                              <button
+                                onClick={(e) => { e.preventDefault(); setEditingLog(log); setIsAddLoanOpen(true); }}
+                                className="text-indigo-600 hover:text-indigo-900 flex items-center gap-1"
+                              >
+                                <Edit2 className="w-4 h-4" /> Edit
+                              </button>
+                              <button
+                                onClick={(e) => { e.preventDefault(); handleDeleteLog(log.id); }}
+                                className="text-red-500 hover:text-red-700 flex items-center gap-1"
+                                title="Delete transaction"
+                              >
+                                <Trash2 className="w-4 h-4" /> Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                         );
