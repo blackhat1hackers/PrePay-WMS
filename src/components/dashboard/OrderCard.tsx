@@ -12,6 +12,7 @@ type Order = {
   buyerId: string;
   sellerName?: string | null;
   productImages: string[];
+  productLinks: string[];
   orderScreenshots: string[];
   reviewScreenshots: string[];
   refundScreenshots: string[];
