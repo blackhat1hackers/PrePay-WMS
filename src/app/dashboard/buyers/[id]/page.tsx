@@ -8,6 +8,7 @@ import BuyerModal from "@/components/dashboard/BuyerModal";
 import OrderModal from "@/components/dashboard/OrderModal";
 import OrderCard from "@/components/dashboard/OrderCard";
 import AddLoanModal from "@/components/dashboard/AddLoanModal";
+import ImageViewerModal from "@/components/dashboard/ImageViewerModal";
 
 export default function BuyerProfilePage() {
   const params = useParams();
@@ -24,6 +25,15 @@ export default function BuyerProfilePage() {
   const [editingLog, setEditingLog] = useState<any>(null);
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("orders");
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
+  const [viewerImages, setViewerImages] = useState<string[]>([]);
+  const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+
+  const openViewer = (images: string[], index: number = 0) => {
+    setViewerImages(images);
+    setViewerInitialIndex(index);
+    setIsImageViewerOpen(true);
+  };
 
   const fetchBuyerData = async () => {
     try {
@@ -190,7 +200,7 @@ export default function BuyerProfilePage() {
             <div className="p-6 border-b border-slate-100 bg-gradient-to-br from-indigo-50/50 to-white flex flex-col items-center text-center">
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-sm bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl font-bold mb-4">
                 {buyer.imageUrl ? (
-                  <img src={buyer.imageUrl} alt={buyer.name} className="w-full h-full object-cover" />
+                  <img src={buyer.imageUrl} alt={buyer.name} className="w-full h-full object-cover cursor-pointer" onClick={() => openViewer([buyer.imageUrl])} />
                 ) : (
                   buyer.name.charAt(0).toUpperCase()
                 )}
@@ -237,6 +247,19 @@ export default function BuyerProfilePage() {
                     <a href={buyer.amazonReviewLink} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline break-all">
                       {buyer.amazonReviewLink}
                     </a>
+                  ) : (
+                    <p className="text-sm text-slate-900">-</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <ImageIcon className="w-4 h-4 text-slate-400 mt-0.5" />
+                <div>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-0.5">Walmart Profile</p>
+                  {buyer.walmartScreenshot ? (
+                    <button onClick={() => openViewer([buyer.walmartScreenshot])} className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
+                      <ImageIcon className="w-3 h-3" /> View Screenshot
+                    </button>
                   ) : (
                     <p className="text-sm text-slate-900">-</p>
                   )}
@@ -475,6 +498,13 @@ export default function BuyerProfilePage() {
         onSuccess={fetchBuyerData}
         buyerId={buyer.id}
         editLog={editingLog}
+      />
+
+      <ImageViewerModal
+        isOpen={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+        images={viewerImages}
+        initialIndex={viewerInitialIndex}
       />
 
     </div>

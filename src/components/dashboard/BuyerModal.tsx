@@ -18,6 +18,7 @@ type Buyer = {
   facebookLink: string | null;
   amazonReviewLink?: string | null;
   imageUrl?: string | null;
+  walmartScreenshot?: string | null;
 };
 
 interface BuyerModalProps {
@@ -44,6 +45,7 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
     amazonReviewLink: "",
     accountStatus: "Active",
     imageUrl: "",
+    walmartScreenshot: "",
   });
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
         amazonReviewLink: buyer.amazonReviewLink || "",
         accountStatus: buyer.accountStatus || "Active",
         imageUrl: buyer.imageUrl || "",
+        walmartScreenshot: buyer.walmartScreenshot || "",
       });
     } else {
       setFormData({
@@ -76,6 +79,7 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
         amazonReviewLink: "",
         accountStatus: "Active",
         imageUrl: "",
+        walmartScreenshot: "",
       });
     }
     setError("");
@@ -107,6 +111,35 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
         setFormData(prev => ({ ...prev, imageUrl: data.url }));
       } else {
         setError("Failed to upload image");
+      }
+    } catch (err) {
+      setError("An error occurred during upload");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleWalmartScreenshotUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setError("");
+
+    const fd = new FormData();
+    fd.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: fd,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setFormData(prev => ({ ...prev, walmartScreenshot: data.url }));
+      } else {
+        setError("Failed to upload walmart screenshot");
       }
     } catch (err) {
       setError("An error occurred during upload");
@@ -296,6 +329,28 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
                 placeholder="https://amazon.com/gp/profile/..."
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Walmart Profile Screenshot</label>
+              <div className="flex items-center gap-4">
+                 {formData.walmartScreenshot ? (
+                   <div className="relative group w-20 h-20 rounded-lg overflow-hidden border border-slate-200">
+                      <img src={formData.walmartScreenshot} alt="Walmart Profile" className="w-full h-full object-cover cursor-pointer" onClick={() => window.open(formData.walmartScreenshot, '_blank')} />
+                      <button type="button" onClick={() => setFormData(prev => ({ ...prev, walmartScreenshot: "" }))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <X className="w-3 h-3" />
+                      </button>
+                   </div>
+                 ) : (
+                   <div className="w-20 h-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center">
+                      <Upload className="w-6 h-6 text-slate-400" />
+                   </div>
+                 )}
+                 <label className={`cursor-pointer text-sm font-medium px-4 py-2 rounded-lg transition-colors ${uploadingImage ? 'bg-slate-100 text-slate-400' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}>
+                   {uploadingImage ? 'Uploading...' : (formData.walmartScreenshot ? 'Change Image' : 'Upload Walmart Profile Screenshot')}
+                   <input type="file" className="sr-only" accept="image/*" onChange={handleWalmartScreenshotUpload} disabled={uploadingImage} />
+                 </label>
+              </div>
             </div>
 
             <div>

@@ -39,6 +39,7 @@ model Buyer {
   facebookLink       String?
   amazonReviewLink   String?
   imageUrl           String?
+  walmartScreenshot  String?
   availableBalance   Float     @default(0.0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

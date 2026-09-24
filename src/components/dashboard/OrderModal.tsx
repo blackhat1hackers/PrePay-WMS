@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, Loader2, Upload, Image as ImageIcon } from "lucide-react";
+import ImageViewerModal from "./ImageViewerModal";
 
 type Buyer = {
   id: string;
@@ -19,6 +20,7 @@ type Order = {
   productImage?: string | null;
   productLink?: string | null;
   orderScreenshots: string[];
+  reviewScreenshots: string[];
   orderSubmissionDate?: string | null;
   reviewSubmissionDate?: string | null;
 };
@@ -30,7 +32,7 @@ interface OrderModalProps {
   order?: Order | null;
 }
 
-const ImageUploadSection = ({ title, category, urls, uploading, onUpload, onRemove }: any) => (
+const ImageUploadSection = ({ title, category, urls, uploading, onUpload, onRemove, onImageClick }: any) => (
   <div className="border border-slate-200 rounded-lg p-3 bg-white">
     <div className="flex justify-between items-center mb-3">
       <span className="text-sm font-medium text-slate-700">{title}</span>
@@ -43,9 +45,9 @@ const ImageUploadSection = ({ title, category, urls, uploading, onUpload, onRemo
     {urls && urls.length > 0 ? (
       <div className="grid grid-cols-2 gap-2">
         {urls.map((url: string, idx: number) => (
-          <div key={idx} className="relative group rounded-md overflow-hidden border border-slate-200 aspect-square">
+          <div key={idx} className="relative group rounded-md overflow-hidden border border-slate-200 aspect-square cursor-pointer" onClick={() => onImageClick && onImageClick(urls, idx)}>
             <img src={url} alt={`${title} ${idx}`} className="w-full h-full object-cover" />
-            <button type="button" onClick={() => onRemove(idx)} className="absolute top-1 right-1 bg-red-500/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600">
+            <button type="button" onClick={(e) => { e.stopPropagation(); onRemove(idx); }} className="absolute top-1 right-1 bg-red-500/90 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-sm">
               <X className="w-3 h-3" />
             </button>
           </div>
@@ -64,6 +66,15 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
   const [error, setError] = useState("");
   const [buyers, setBuyers] = useState<Buyer[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [viewerImages, setViewerImages] = useState<string[]>([]);
+  const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
+  
+  const handleImageClick = (urls: string[], index: number) => {
+    setViewerImages(urls);
+    setViewerInitialIndex(index);
+    setIsViewerOpen(true);
+  };
   
   const [formData, setFormData] = useState<Order>({
     orderNumber: "",
@@ -75,6 +86,7 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
     productImage: "",
     productLink: "",
     orderScreenshots: [],
+    reviewScreenshots: [],
     orderSubmissionDate: "",
     reviewSubmissionDate: "",
   });
@@ -106,6 +118,7 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
         productImage: order.productImage || "",
         productLink: order.productLink || "",
         orderScreenshots: order.orderScreenshots || [],
+        reviewScreenshots: order.reviewScreenshots || [],
         orderSubmissionDate: order.orderSubmissionDate ? new Date(order.orderSubmissionDate).toISOString().split('T')[0] : "",
         reviewSubmissionDate: order.reviewSubmissionDate ? new Date(order.reviewSubmissionDate).toISOString().split('T')[0] : "",
       });
@@ -120,6 +133,7 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
         productImage: "",
         productLink: "",
         orderScreenshots: [],
+        reviewScreenshots: [],
         orderSubmissionDate: "",
         reviewSubmissionDate: "",
       }));
@@ -285,9 +299,9 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
                  <label className="block text-sm font-medium text-slate-700 mb-1">Product Image</label>
                  <div className="flex items-center gap-4">
                     {formData.productImage ? (
-                      <div className="relative group w-20 h-20 rounded-lg overflow-hidden border border-slate-200">
+                      <div className="relative group w-20 h-20 rounded-lg overflow-hidden border border-slate-200 cursor-pointer" onClick={() => handleImageClick([formData.productImage!], 0)}>
                          <img src={formData.productImage} alt="Product" className="w-full h-full object-cover" />
-                         <button type="button" onClick={() => setFormData(prev => ({ ...prev, productImage: "" }))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button type="button" onClick={(e) => { e.stopPropagation(); setFormData(prev => ({ ...prev, productImage: "" })); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
                             <X className="w-3 h-3" />
                          </button>
                       </div>
@@ -397,8 +411,8 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
             </div>
 
             <div className="pt-4 border-t border-slate-100">
-              <h4 className="text-sm font-semibold text-slate-900 mb-3">Order Screenshots</h4>
-              <div className="grid grid-cols-1 gap-4">
+              <h4 className="text-sm font-semibold text-slate-900 mb-3">Screenshots</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ImageUploadSection 
                   title="Order Receipt / Confirmation" 
                   category="orderScreenshots"
@@ -406,6 +420,16 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
                   uploading={uploadingImage} 
                   onUpload={(e: any) => handleFileUpload(e, "orderScreenshots")}
                   onRemove={(i: number) => removeImage("orderScreenshots", i)}
+                  onImageClick={handleImageClick}
+                />
+                <ImageUploadSection 
+                  title="Review Screenshot" 
+                  category="reviewScreenshots"
+                  urls={formData.reviewScreenshots} 
+                  uploading={uploadingImage} 
+                  onUpload={(e: any) => handleFileUpload(e, "reviewScreenshots")}
+                  onRemove={(i: number) => removeImage("reviewScreenshots", i)}
+                  onImageClick={handleImageClick}
                 />
               </div>
             </div>
@@ -430,6 +454,12 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
           </form>
         </div>
       </div>
+      <ImageViewerModal
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        images={viewerImages}
+        initialIndex={viewerInitialIndex}
+      />
     </div>
   );
 }
