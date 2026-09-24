@@ -202,22 +202,31 @@ export default function OrderDetailPage() {
           <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Product Image</h3>
-              {order.productLink && (
-                <a 
-                  href={order.productLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-md transition-colors"
-                  title="View Product"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                  Product Link
-                </a>
+              {order.productLinks && order.productLinks.length > 0 && (
+                <div className="flex gap-2 flex-wrap justify-end max-w-[200px]">
+                  {order.productLinks.map((link: string, idx: number) => (
+                    <a 
+                      key={idx}
+                      href={link} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2.5 py-1 rounded-md transition-colors"
+                      title="View Product"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                      Link {idx + 1}
+                    </a>
+                  ))}
+                </div>
               )}
             </div>
             <div className="flex-1 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl overflow-hidden relative flex items-center justify-center min-h-[200px]">
-              {order.productImage ? (
-                <img src={order.productImage} alt="Product" className="w-full h-full object-cover" />
+              {order.productImages && order.productImages.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 w-full p-2 h-full">
+                  {order.productImages.map((img: string, idx: number) => (
+                    <img key={idx} src={img} alt={`Product ${idx + 1}`} className="w-full h-full object-cover rounded-lg" />
+                  ))}
+                </div>
               ) : (
                 <div className="text-slate-400 flex flex-col items-center">
                   <ImageIcon className="w-10 h-10 mb-2 opacity-50" />

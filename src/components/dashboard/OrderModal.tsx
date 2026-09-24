@@ -17,8 +17,8 @@ type Order = {
   amount: number;
   status: string;
   buyerId: string;
-  productImage?: string | null;
-  productLink?: string | null;
+  productImages: string[];
+  productLinks: string[];
   orderScreenshots: string[];
   reviewScreenshots: string[];
   orderSubmissionDate?: string | null;
@@ -83,8 +83,8 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
     amount: 0,
     status: "Order Done",
     buyerId: "",
-    productImage: "",
-    productLink: "",
+    productImages: [],
+    productLinks: [],
     orderScreenshots: [],
     reviewScreenshots: [],
     orderSubmissionDate: "",
@@ -115,8 +115,8 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
         amount: order.amount,
         status: order.status,
         buyerId: order.buyerId,
-        productImage: order.productImage || "",
-        productLink: order.productLink || "",
+        productImages: order.productImages || [],
+        productLinks: order.productLinks || [],
         orderScreenshots: order.orderScreenshots || [],
         reviewScreenshots: order.reviewScreenshots || [],
         orderSubmissionDate: order.orderSubmissionDate ? new Date(order.orderSubmissionDate).toISOString().split('T')[0] : "",
@@ -130,8 +130,8 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
         amount: 0,
         status: "Order Done",
         buyerId: prev.buyerId || (buyers[0]?.id || ""),
-        productImage: "",
-        productLink: "",
+        productImages: [],
+        productLinks: [],
         orderScreenshots: [],
         reviewScreenshots: [],
         orderSubmissionDate: "",
@@ -173,8 +173,11 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
 
       const urls = await Promise.all(uploadPromises);
       
-      if (category === "productImage") {
-         setFormData(prev => ({ ...prev, productImage: urls[0] }));
+      if (category === "productImages") {
+         setFormData(prev => ({ 
+           ...prev, 
+           productImages: [...(prev.productImages || []), ...urls] 
+         }));
       } else {
          setFormData(prev => ({ 
            ...prev, 
@@ -296,35 +299,25 @@ export default function OrderModal({ isOpen, onClose, onSuccess, order }: OrderM
               </div>
 
               <div className="col-span-2">
-                 <label className="block text-sm font-medium text-slate-700 mb-1">Product Image</label>
-                 <div className="flex items-center gap-4">
-                    {formData.productImage ? (
-                      <div className="relative group w-20 h-20 rounded-lg overflow-hidden border border-slate-200 cursor-pointer" onClick={() => handleImageClick([formData.productImage!], 0)}>
-                         <img src={formData.productImage} alt="Product" className="w-full h-full object-cover" />
-                         <button type="button" onClick={(e) => { e.stopPropagation(); setFormData(prev => ({ ...prev, productImage: "" })); }} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
-                            <X className="w-3 h-3" />
-                         </button>
-                      </div>
-                    ) : (
-                      <div className="w-20 h-20 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center">
-                         <ImageIcon className="w-6 h-6 text-slate-400" />
-                      </div>
-                    )}
-                    <label className={`cursor-pointer text-sm font-medium px-4 py-2 rounded-lg transition-colors ${uploadingImage ? 'bg-slate-100 text-slate-400' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'}`}>
-                      {uploadingImage ? 'Uploading...' : (formData.productImage ? 'Change Image' : 'Upload Product Image')}
-                      <input type="file" className="sr-only" accept="image/*" onChange={(e) => handleFileUpload(e, "productImage")} disabled={uploadingImage} />
-                    </label>
-                 </div>
+                <ImageUploadSection 
+                  title="Product Images" 
+                  category="productImages"
+                  urls={formData.productImages} 
+                  uploading={uploadingImage} 
+                  onUpload={(e: any) => handleFileUpload(e, "productImages")}
+                  onRemove={(i: number) => removeImage("productImages", i)}
+                  onImageClick={handleImageClick}
+                />
               </div>
 
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Product Link</label>
-                <input
-                  type="url"
-                  name="productLink"
-                  value={formData.productLink || ""}
-                  onChange={handleChange}
-                  placeholder="https://www.amazon.com/dp/..."
+                <label className="block text-sm font-medium text-slate-700 mb-1">Product Links (One per line)</label>
+                <textarea
+                  name="productLinks"
+                  value={formData.productLinks ? formData.productLinks.join('\n') : ""}
+                  onChange={(e) => setFormData(prev => ({ ...prev, productLinks: e.target.value.split('\n') }))}
+                  placeholder="https://www.amazon.com/dp/...&#10;https://www.amazon.com/dp/..."
+                  rows={3}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
               </div>

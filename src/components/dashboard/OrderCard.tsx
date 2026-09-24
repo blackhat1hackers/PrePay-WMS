@@ -11,7 +11,7 @@ type Order = {
   status: string;
   buyerId: string;
   sellerName?: string | null;
-  productImage?: string | null;
+  productImages: string[];
   orderScreenshots: string[];
   reviewScreenshots: string[];
   refundScreenshots: string[];
@@ -79,8 +79,8 @@ export default function OrderCard({ order, onEdit, onDelete, showBuyer = true }:
       <Link href={`/dashboard/orders/${order.id}`} className="flex-1 flex flex-col">
         {/* Product Image Area */}
         <div className="w-full h-40 bg-slate-50 border-b border-slate-100 flex items-center justify-center relative overflow-hidden shrink-0">
-          {order.productImage ? (
-            <img src={order.productImage} alt="Product" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          {order.productImages && order.productImages.length > 0 ? (
+            <img src={order.productImages[0]} alt="Product" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="text-slate-300 flex flex-col items-center">
               <ImageIcon className="w-10 h-10 mb-1 opacity-50" />

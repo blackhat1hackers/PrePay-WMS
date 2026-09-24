@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Loader2, Upload } from "lucide-react";
+import { X, Loader2, Upload, Star } from "lucide-react";
 
 type Buyer = {
   id?: string;
@@ -19,6 +19,7 @@ type Buyer = {
   amazonReviewLink?: string | null;
   imageUrl?: string | null;
   walmartScreenshot?: string | null;
+  trustRating?: number;
 };
 
 interface BuyerModalProps {
@@ -46,6 +47,7 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
     accountStatus: "Active",
     imageUrl: "",
     walmartScreenshot: "",
+    trustRating: 0,
   });
 
   useEffect(() => {
@@ -64,6 +66,7 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
         accountStatus: buyer.accountStatus || "Active",
         imageUrl: buyer.imageUrl || "",
         walmartScreenshot: buyer.walmartScreenshot || "",
+        trustRating: buyer.trustRating || 0,
       });
     } else {
       setFormData({
@@ -80,6 +83,7 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
         accountStatus: "Active",
         imageUrl: "",
         walmartScreenshot: "",
+        trustRating: 0,
       });
     }
     setError("");
@@ -252,6 +256,24 @@ export default function BuyerModal({ isOpen, onClose, onSuccess, buyer }: BuyerM
                   placeholder="+1 234 567 8900"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Trust Rating</label>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setFormData(prev => ({ ...prev, trustRating: star }))}
+                    className="p-1 focus:outline-none transition-colors"
+                  >
+                    <Star 
+                      className={`w-6 h-6 ${star <= formData.trustRating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`} 
+                    />
+                  </button>
+                ))}
               </div>
             </div>
 

@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { orderNumber, marketplace, sellerName, amount, status, buyerId, productImage, productLink, orderScreenshots, reviewScreenshots, orderSubmissionDate, reviewSubmissionDate } = body;
+    const { orderNumber, marketplace, sellerName, amount, status, buyerId, productImages, productLinks, orderScreenshots, reviewScreenshots, orderSubmissionDate, reviewSubmissionDate } = body;
 
     if (!orderNumber || !buyerId) {
       return new NextResponse("Order Number and Buyer ID are required", { status: 400 });
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
         amount: parsedAmount,
         status: status || "Order Done",
         buyerId,
-        productImage,
-        productLink,
+        productImages: Array.isArray(productImages) ? productImages : [],
+        productLinks: Array.isArray(productLinks) ? productLinks : [],
         orderScreenshots: Array.isArray(orderScreenshots) ? orderScreenshots : [],
         reviewScreenshots: Array.isArray(reviewScreenshots) ? reviewScreenshots : [],
         orderSubmissionDate: orderSubmissionDate ? new Date(orderSubmissionDate) : null,

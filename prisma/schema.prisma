@@ -41,6 +41,7 @@ model Buyer {
   imageUrl           String?
   walmartScreenshot  String?
   availableBalance   Float     @default(0.0)
+  trustRating        Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
@@ -71,8 +72,8 @@ model Order {
   orderDate     DateTime  @default(now())
   orderSubmissionDate DateTime?
   reviewSubmissionDate DateTime?
-  productImage  String?
-  productLink   String?
+  productImages String[] @default([])
+  productLinks  String[] @default([])
   
   orderScreenshots  String[] @default([])
   reviewScreenshots String[] @default([])

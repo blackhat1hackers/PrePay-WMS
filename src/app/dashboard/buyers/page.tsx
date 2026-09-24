@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Edit2, Trash2, Search, Loader2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Loader2, Star } from "lucide-react";
 import BuyerModal from "@/components/dashboard/BuyerModal";
 
 type Buyer = {
@@ -19,6 +19,7 @@ type Buyer = {
   createdAt: string;
   imageUrl?: string | null;
   availableBalance?: number;
+  trustRating?: number;
 };
 
 export default function BuyersPage() {
@@ -122,6 +123,15 @@ export default function BuyersPage() {
                   
                   <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{buyer.name}</h3>
                   <div className="text-sm text-slate-500 mt-1 truncate w-full px-4">{buyer.email || "No email"}</div>
+                  
+                  <div className="flex items-center gap-1 mt-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star 
+                        key={star} 
+                        className={`w-3.5 h-3.5 ${star <= (buyer.trustRating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} 
+                      />
+                    ))}
+                  </div>
                   
                   <div className="mt-4 flex flex-wrap gap-2 justify-center">
                     <span className={`inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full ${

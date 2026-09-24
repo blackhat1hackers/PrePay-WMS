@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Edit2, Plus, Mail, Phone, MapPin, DollarSign, Loader2, Info, Wallet, History, ImageIcon, Link as LinkIcon, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit2, Plus, Mail, Phone, MapPin, DollarSign, Loader2, Info, Wallet, History, ImageIcon, Link as LinkIcon, Trash2, Star } from "lucide-react";
 import BuyerModal from "@/components/dashboard/BuyerModal";
 import OrderModal from "@/components/dashboard/OrderModal";
 import OrderCard from "@/components/dashboard/OrderCard";
@@ -209,6 +209,14 @@ export default function BuyerProfilePage() {
               <div className="flex items-center gap-2 mt-2 text-sm text-slate-600">
                 <Mail className="w-4 h-4" />
                 {buyer.email || "No email provided"}
+              </div>
+              <div className="flex items-center gap-1 mt-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star 
+                    key={star} 
+                    className={`w-4 h-4 ${star <= (buyer.trustRating || 0) ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} 
+                  />
+                ))}
               </div>
             </div>
             <div className="p-6 space-y-4">

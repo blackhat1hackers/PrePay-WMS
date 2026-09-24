@@ -12,7 +12,7 @@ type Order = {
   amount: number;
   status: string;
   buyerId: string;
-  productImage?: string | null;
+  productImages: string[];
   orderScreenshots: string[];
   reviewScreenshots: string[];
   refundScreenshots: string[];
