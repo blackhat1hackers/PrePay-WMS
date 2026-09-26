@@ -23,8 +23,8 @@ export default function TopNav({ setSidebarOpen }: { setSidebarOpen?: (v: boolea
         <div className="ml-4 flex items-center md:ml-6 space-x-4">
           <div className="flex items-center text-sm font-medium text-slate-700">
             <UserIcon className="h-5 w-5 mr-2 text-slate-400" />
-            <span>{session?.user?.name || session?.user?.email}</span>
-            <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+            <span className="truncate max-w-[120px] sm:max-w-none">{session?.user?.name || session?.user?.email}</span>
+            <span className="hidden sm:inline-flex ml-3 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
               {session?.user?.role || 'User'}
             </span>
           </div>
